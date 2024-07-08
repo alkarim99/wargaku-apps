@@ -12,10 +12,111 @@ model User {
   id            String   @id @default(cuid()) @map("_id")
   name          String?
   email         String   @unique
-  emailVerified DateTime?
-  emailToken    String?
+  emailVerified DateTime? @map("email_verified")
+  emailToken    String? @map("email_token")
   image         String?
   password      String?
-  passwordToken String?
+  passwordToken String? @map("password_token")
 }
 
+model Warga {
+  id              String   @id @default(cuid()) @map("_id")
+  nik             String   @unique
+  name            String
+  birthPlace      String   @map("birth_place")
+  birthDate       DateTime @map("birth_date")
+  gender          Gender   @default(MALE)
+  religion        Religion
+  education       Education
+  work            String?
+  mariageStatus   MarriageStatus @default(BELUM_KAWIN) @map("mariage_status")
+  nationality     Nationality @default(WNI)
+  phone           String
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Religion {
+  ISLAM
+  KRISTEN
+  HINDU
+  BUDHA
+  KATOLIK
+  KONGHUCU
+  OTHERS
+}
+
+enum Education {
+  SD
+  SMP
+  SMA_SMK
+  D1
+  D2
+  D3
+  D4
+  S1
+  S2
+  S3
+}
+
+enum MarriageStatus {
+  BELUM_KAWIN
+  KAWIN
+  CERAI_HIDUP
+  CERAI_MATI
+}
+
+enum Nationality {
+  WNI
+  WNA
+}
+
+model Keluarga {
+  id             String   @id @default(cuid()) @map("_id")
+  kkNumber       String   @unique @map("kk_number")
+  address        String
+  rt             String
+  rw             String
+  subDistrict    String   @map("sub_district")
+  district       String
+  city           String
+  province       String
+  postalCode     String @map("postal_code")
+  publishDate    DateTime @map("publish_date")
+}
+
+model Anggota_Keluarga {
+  id              String   @id @default(cuid()) @map("_id")
+  keluarga        KeluargaDataEmbed @relation(fields: [keluargaId], references: [id], onDelete: Cascade)
+  keluargaId      String
+  warga           WargaDataEmbed @relation(fields: [wargaId], references: [id], onDelete: Cascade)
+  wargaId         String
+  familyRelation  FamilyRelation @map("family_relation")
+}
+
+model KeluargaDataEmbed {
+  id               String   @id @default(cuid()) @map("_id")
+  kkNumber         String   @unique @map("kk_number")
+  address          String
+  anggota_keluarga Anggota_Keluarga[]
+}
+
+model WargaDataEmbed {
+  id               String   @id @default(cuid()) @map("_id")
+  nik              String   @unique
+  name             String
+  gender           Gender   @default(MALE)
+  anggota_keluarga Anggota_Keluarga[]
+}
+
+enum FamilyRelation {
+  KEPALA_KELUARGA
+  SUAMI
+  ISTRI
+  ANAK
+  ORANG_TUA
+  MERTUA
+}
