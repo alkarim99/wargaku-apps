@@ -32,11 +32,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No user found with this email.");
         }
 
-        if (!user.emailVerified) {
-          throw new Error(
-            "Your account is not verified. Please check your email inbox to verify your account."
-          );
-        }
+        // if (!user.emailVerified) {
+        //   throw new Error(
+        //     "Your account is not verified. Please check your email inbox to verify your account."
+        //   );
+        // }
 
         const isValidPassword = await bcrypt.compare(
           credentials.password,

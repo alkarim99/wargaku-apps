@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await sendVerificationEmail(email, token);
+  // await sendVerificationEmail(email, token);
 
   const response = NextResponse.json({
     message:
