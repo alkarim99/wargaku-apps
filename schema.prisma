@@ -20,18 +20,18 @@ model User {
 }
 
 model Warga {
-  id              String   @id @default(cuid()) @map("_id")
-  nik             String   @unique
-  name            String
-  birthPlace      String   @map("birth_place")
-  birthDate       DateTime @map("birth_date")
-  gender          Gender   @default(MALE)
-  religion        Religion
-  education       Education
-  work            String?
-  mariageStatus   MarriageStatus @default(BELUM_KAWIN) @map("mariage_status")
-  nationality     Nationality @default(WNI)
-  phone           String
+  id            String   @id @default(cuid()) @map("_id")
+  nik           String   @unique
+  name          String
+  birthPlace    String   @map("birth_place")
+  birthDate     DateTime @map("birth_date")
+  gender        Gender   @default(MALE)
+  religion      Religion
+  education     Education
+  work          String?
+  marriageStatus MarriageStatus @default(BELUM_KAWIN) @map("marriage_status")
+  nationality   Nationality @default(WNI)
+  phone         String
 }
 
 enum Gender {
@@ -75,41 +75,26 @@ enum Nationality {
 }
 
 model Keluarga {
-  id             String   @id @default(cuid()) @map("_id")
-  kkNumber       String   @unique @map("kk_number")
+  id             String             @id @default(cuid()) @map("_id")
+  kkNumber       String             @unique @map("kk_number")
   address        String
   rt             String
   rw             String
-  subDistrict    String   @map("sub_district")
+  subDistrict    String             @map("sub_district")
   district       String
   city           String
   province       String
-  postalCode     String @map("postal_code")
-  publishDate    DateTime @map("publish_date")
+  postalCode     String             @map("postal_code")
+  publishDate    DateTime           @map("publish_date")
+  anggotaKeluarga AnggotaKeluarga[] @relation("KeluargaToAnggota") @map("anggota_keluarga")
 }
 
-model Anggota_Keluarga {
-  id              String   @id @default(cuid()) @map("_id")
-  keluarga        KeluargaDataEmbed @relation(fields: [keluargaId], references: [id], onDelete: Cascade)
-  keluargaId      String
-  warga           WargaDataEmbed @relation(fields: [wargaId], references: [id], onDelete: Cascade)
-  wargaId         String
-  familyRelation  FamilyRelation @map("family_relation")
-}
-
-model KeluargaDataEmbed {
-  id               String   @id @default(cuid()) @map("_id")
-  kkNumber         String   @unique @map("kk_number")
-  address          String
-  anggota_keluarga Anggota_Keluarga[]
-}
-
-model WargaDataEmbed {
-  id               String   @id @default(cuid()) @map("_id")
-  nik              String   @unique
-  name             String
-  gender           Gender   @default(MALE)
-  anggota_keluarga Anggota_Keluarga[]
+model AnggotaKeluarga {
+  id             String         @id @default(cuid()) @map("_id")
+  keluargaId     String         @map("keluarga_id")
+  wargaId        String         @map("warga_id")
+  familyRelation FamilyRelation @map("family_relation")
+  keluarga       Keluarga       @relation("KeluargaToAnggota", fields: [keluargaId], references: [id])
 }
 
 enum FamilyRelation {
