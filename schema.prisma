@@ -9,29 +9,64 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid()) @map("_id")
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String   @unique
+  email         String    @unique
   emailVerified DateTime? @map("email_verified")
-  emailToken    String? @map("email_token")
+  emailToken    String?   @map("email_token")
   image         String?
   password      String?
-  passwordToken String? @map("password_token")
+  passwordToken String?   @map("password_token")
+
+  @@map("users")
 }
 
-model Warga {
-  id            String   @id @default(cuid()) @map("_id")
-  nik           String   @unique
-  name          String
-  birthPlace    String   @map("birth_place")
-  birthDate     DateTime @map("birth_date")
-  gender        Gender   @default(MALE)
-  religion      Religion
-  education     Education
-  work          String?
-  marriageStatus MarriageStatus @default(BELUM_KAWIN) @map("marriage_status")
-  nationality   Nationality @default(WNI)
-  phone         String
+model Family {
+  id              String             @id @default(auto()) @map("_id") @db.ObjectId
+  kkNumber        String             @unique @map("kk_number")
+  address         String
+  rt              String
+  rw              String
+  subDistrict     String             @map("sub_district")
+  district        String
+  city            String
+  province        String
+  postalCode      String             @map("postal_code")
+  publishDate     DateTime           @map("publish_date")
+  familyMembers   FamilyMember[]
+
+  @@map("families")
+}
+
+model FamilyMember {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  familyRelation FamilyRelation @map("family_relation")
+  family         Family         @relation(fields: [familyId], references: [id])
+  familyId       String         @map("family_id") @db.ObjectId
+  residentId     String         @unique @map("resident_id") @db.ObjectId
+  resident       Resident       @relation(fields: [residentId], references: [id])
+
+  @@map("family_members")
+}
+
+model Resident {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  nik             String         @unique
+  name            String
+  birthPlace      String         @map("birth_place")
+  birthDate       DateTime       @map("birth_date")
+  gender          Gender         @default(MALE)
+  religion        Religion
+  education       Education
+  work            String?
+  marriageStatus  MarriageStatus @default(BELUM_KAWIN) @map("marriage_status")
+  nationality     Nationality    @default(WNI)
+  phone           String?
+  familyMember    FamilyMember?
+  
+  @@map("residents")
+  @@index([name])
+  @@index([birthDate])
 }
 
 enum Gender {
@@ -72,29 +107,6 @@ enum MarriageStatus {
 enum Nationality {
   WNI
   WNA
-}
-
-model Keluarga {
-  id             String             @id @default(cuid()) @map("_id")
-  kkNumber       String             @unique @map("kk_number")
-  address        String
-  rt             String
-  rw             String
-  subDistrict    String             @map("sub_district")
-  district       String
-  city           String
-  province       String
-  postalCode     String             @map("postal_code")
-  publishDate    DateTime           @map("publish_date")
-  anggotaKeluarga AnggotaKeluarga[] @relation("KeluargaToAnggota") @map("anggota_keluarga")
-}
-
-model AnggotaKeluarga {
-  id             String         @id @default(cuid()) @map("_id")
-  keluargaId     String         @map("keluarga_id")
-  wargaId        String         @map("warga_id")
-  familyRelation FamilyRelation @map("family_relation")
-  keluarga       Keluarga       @relation("KeluargaToAnggota", fields: [keluargaId], references: [id])
 }
 
 enum FamilyRelation {
