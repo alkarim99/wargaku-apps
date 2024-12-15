@@ -33,6 +33,8 @@ model Family {
   province        String
   postalCode      String             @map("postal_code")
   publishDate     DateTime           @map("publish_date")
+  createdAt       DateTime           @map("created_at")
+  updatedAt       DateTime           @map("updated_at")
   familyMembers   FamilyMember[]
 
   @@map("families")
@@ -45,6 +47,8 @@ model FamilyMember {
   familyId       String         @map("family_id") @db.ObjectId
   residentId     String         @unique @map("resident_id") @db.ObjectId
   resident       Resident       @relation(fields: [residentId], references: [id])
+  createdAt      DateTime       @map("created_at")
+  updatedAt      DateTime       @map("updated_at")
 
   @@map("family_members")
 }
@@ -62,6 +66,8 @@ model Resident {
   marriageStatus  MarriageStatus @default(BELUM_KAWIN) @map("marriage_status")
   nationality     Nationality    @default(WNI)
   phone           String?
+  createdAt       DateTime       @map("created_at")
+  updatedAt       DateTime       @map("updated_at")
   familyMember    FamilyMember?
   
   @@map("residents")

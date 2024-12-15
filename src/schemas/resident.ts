@@ -1,9 +1,5 @@
 import { z } from "zod"
 
-export const getResidentByFamilySchema = z.object({
-  id: z.string({ message: "Family ID is required." }),
-})
-
 export const getDetailResidentSchema = z.object({
   id: z.string({ message: "Resident ID is required." }),
 })
@@ -15,19 +11,12 @@ export const createResidentSchema = z.object({
     .max(16, { message: "NIK must be at most 16 characters long." }),
   name: z.string().min(1, { message: "Name is required." }),
   birthPlace: z.string().min(1, { message: "Birth place is required." }),
-  birthDate: z.string().date(),
+  birthDate: z.coerce.date({
+    message: "Birth date must be a valid ISO-8601 date string.",
+  }),
   gender: z.enum(["MALE", "FEMALE"], { message: "Gender is required." }),
   religion: z.enum(
-    [
-      "ISLAM",
-      "KRISTEN",
-      "HINDU",
-      "BUDHA",
-      "KATOLIK",
-      "KONGHUCU",
-      "OTHERS",
-      "FEMALE",
-    ],
+    ["ISLAM", "KRISTEN", "HINDU", "BUDHA", "KATOLIK", "KONGHUCU", "OTHERS"],
     { message: "Religion is required." }
   ),
   education: z.enum(
@@ -59,19 +48,12 @@ export const updateResidentSchema = z.object({
     .max(16, { message: "NIK must be at most 16 characters long." }),
   name: z.string().min(1, { message: "Name is required." }),
   birthPlace: z.string().min(1, { message: "Birth place is required." }),
-  birthDate: z.string().date(),
+  birthDate: z.coerce.date({
+    message: "Birth date must be a valid ISO-8601 date string.",
+  }),
   gender: z.enum(["MALE", "FEMALE"], { message: "Gender is required." }),
   religion: z.enum(
-    [
-      "ISLAM",
-      "KRISTEN",
-      "HINDU",
-      "BUDHA",
-      "KATOLIK",
-      "KONGHUCU",
-      "OTHERS",
-      "FEMALE",
-    ],
+    ["ISLAM", "KRISTEN", "HINDU", "BUDHA", "KATOLIK", "KONGHUCU", "OTHERS"],
     { message: "Religion is required." }
   ),
   education: z.enum(
