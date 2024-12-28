@@ -1,14 +1,16 @@
-import React from "react";
-import Link from "next/link";
-import { Package2 } from "lucide-react";
+import React from "react"
+import Link from "next/link"
+import { Package2 } from "lucide-react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface NavigationProps {
-  isMobile?: boolean;
+  isMobile?: boolean
 }
 
 const Navigation: React.FC<NavigationProps> = ({ isMobile = false }) => {
   return (
     <>
+      <SidebarTrigger />
       <Link
         href="#"
         className="flex items-center gap-2 text-lg font-semibold md:text-base"
@@ -25,7 +27,7 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false }) => {
         Dashboard
       </Link>
     </>
-  );
-};
+  )
+}
 
-export default Navigation;
+export default Navigation

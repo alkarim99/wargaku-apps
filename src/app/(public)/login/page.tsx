@@ -25,7 +25,7 @@ const Page: React.FC = () => {
       </div>
       <Form />
       <div className="grid gap-4">
-        <LoginButton />
+        {/* <LoginButton /> */}
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="underline">
