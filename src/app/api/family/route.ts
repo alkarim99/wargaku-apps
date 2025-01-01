@@ -4,23 +4,16 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { createFamilySchema, updateFamilySchema } from "@/schemas/family"
 
-export async function GET() {
-  const session = await getServerSession(authOptions)
+export async function GET(request: Request) {
+  // const session = await getServerSession(authOptions)
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
-  }
+  // if (!session?.user?.email) {
+  //   return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
+  // }
 
   try {
     const families = await prisma.family.findMany({
-      select: {
-        id: true,
-        kkNumber: true,
-        address: true,
-        rt: true,
-        rw: true,
-        publishDate: true,
-        createdAt: true,
+      include: {
         familyMembers: true,
       },
     })
@@ -32,7 +25,16 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json({ status: 200, data: families })
+    const formattedFamilies = families.map((family) => ({
+      id: family.id,
+      kkNumber: family.kkNumber,
+      address: family.address,
+      rt: family.rt,
+      rw: family.rw,
+      numberOfFamily: family.familyMembers.length,
+    }))
+
+    return NextResponse.json({ status: 200, data: formattedFamilies })
   } catch (error) {
     const err = error as Error
     return NextResponse.json(
