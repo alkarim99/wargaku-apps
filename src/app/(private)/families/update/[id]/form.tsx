@@ -7,13 +7,15 @@ import { XCircleIcon } from "lucide-react"
 import Spinner from "@/components/spinner"
 import { updateFamilySchema } from "@/schemas/family"
 import { getFamilyById, updateFamily } from "@/lib/family/actions"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 interface FormProps {
   id: string
 }
 
 const Form: React.FC<FormProps> = ({ id, ...props }) => {
+  const router = useRouter()
+
   const [kkNumber, setKkNumber] = useState("")
   const [address, setAddress] = useState("")
   const [rt, setRt] = useState("")
@@ -23,7 +25,7 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
   const [city, setCity] = useState("")
   const [province, setProvince] = useState("")
   const [postalCode, setPostalCode] = useState("")
-  const [publishDate, setPublishDate] = useState(new Date())
+  const [publishDate, setPublishDate] = useState("")
 
   const [errorMessage, setErrorMessage] = useState("")
   const [loading, setLoading] = useState(false)
@@ -34,7 +36,6 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
       if (id) {
         try {
           const family = await getFamilyById(id)
-          console.log(family?.data?.kkNumber)
           setKkNumber(family?.data?.kkNumber)
           setAddress(family?.data?.address)
           setRt(family?.data?.rt)
@@ -44,7 +45,7 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
           setCity(family?.data?.city)
           setProvince(family?.data?.province)
           setPostalCode(family?.data?.postalCode)
-          setPublishDate(family?.data?.publishDate)
+          setPublishDate(family?.data?.publishDate || "")
         } catch (error: any) {
           console.log(error.response)
         } finally {
@@ -93,8 +94,8 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         postalCode,
         publishDate,
       })
-
-      if (res?.status !== 200) {
+      console.log(res)
+      if (res?.message !== "Family updated successfully.") {
         setErrorMessage(res?.message)
       } else {
         setErrorMessage("")
@@ -103,7 +104,8 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
       setErrorMessage("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
-      redirect("/families")
+      router.push("/families")
+      router.refresh()
     }
   }
 
@@ -230,18 +232,20 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
           <Input
             id="publishDate"
             type="date"
-            // Format the Date object to YYYY-MM-DD for the input
-            value={publishDate.toISOString().split("T")[0]}
+            value={
+              publishDate
+                ? new Date(publishDate).toISOString().split("T")[0]
+                : ""
+            }
             onChange={(e) => {
-              // Convert the string date to a Date object
-              setPublishDate(new Date(e.target.value))
+              setPublishDate(e.target.value)
             }}
             required
           />
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Spinner /> : "Tambah"}
+          {loading ? <Spinner /> : "Ubah"}
         </Button>
       </form>
     </>

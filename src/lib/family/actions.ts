@@ -53,3 +53,7 @@ export const updateFamily = (
 ): Promise<FamilyResponse> => {
   return apiCall<FamilyResponse>("put", "/family", data)
 }
+
+export const deleteFamily = (id: string): Promise<FamilyResponse> => {
+  return apiCall<FamilyResponse>("delete", `/family/${id}`)
+}

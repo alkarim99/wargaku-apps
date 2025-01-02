@@ -8,8 +8,11 @@ import Spinner from "@/components/spinner"
 import { createFamilySchema } from "@/schemas/family"
 import { createFamily } from "@/lib/family/actions"
 import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 const Form = () => {
+  const router = useRouter()
+
   const [kkNumber, setKkNumber] = useState("")
   const [address, setAddress] = useState("")
   const [rt, setRt] = useState("")
@@ -69,7 +72,9 @@ const Form = () => {
       setErrorMessage("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
-      redirect("/families")
+      // redirect("/families")
+      router.push("/families")
+      router.refresh()
     }
   }
 
