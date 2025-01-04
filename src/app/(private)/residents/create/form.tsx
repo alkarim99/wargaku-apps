@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { XCircleIcon } from "lucide-react"
+import { Search, XCircleIcon } from "lucide-react"
 import Spinner from "@/components/spinner"
 import { createResidentSchema } from "@/schemas/resident"
 import { createResident } from "@/lib/resident/actions"
@@ -16,7 +16,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import CustomDatePicker from "@/components/admin/custom-datepicker"
-import { Gender } from "generated/client"
+import {
+  Education,
+  FamilyRelation,
+  Gender,
+  MarriageStatus,
+  Nationality,
+  Religion,
+} from "generated/client"
+import SearchableKKSelect from "@/components/admin/custom-select"
+import { createFamilyMember } from "@/lib/family-member/actions"
 
 const Form = () => {
   const router = useRouter()
@@ -26,11 +35,16 @@ const Form = () => {
   const [birthPlace, setBirthPlace] = useState("")
   const [birthDate, setBirthDate] = useState<Date>()
   const [gender, setGender] = useState<Gender>()
-  const [religion, setReligion] = useState("")
-  const [education, setEducation] = useState("")
+  const [religion, setReligion] = useState<Religion>()
+  const [education, setEducation] = useState<Education>()
   const [work, setWork] = useState("")
-  const [marriageStatus, setMarriageStatus] = useState("")
-  const [nationality, setNationality] = useState("")
+  const [marriageStatus, setMarriageStatus] = useState<MarriageStatus>()
+  const [nationality, setNationality] = useState<Nationality>()
+  const [selectedKK, setSelectedKK] = useState<{
+    id: string
+    kkNumber: string
+  } | null>(null)
+  const [familyRelation, setFamilyRelation] = useState<FamilyRelation>()
 
   const [message, setMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
@@ -64,13 +78,21 @@ const Form = () => {
         name,
         birthPlace,
         birthDate: birthDate as Date,
-        gender,
-        religion,
-        education,
+        gender: gender as Gender,
+        religion: religion as Religion,
+        education: education as Education,
         work,
-        marriageStatus,
-        nationality,
+        marriageStatus: marriageStatus as MarriageStatus,
+        nationality: nationality as Nationality,
       })
+
+      if (selectedKK) {
+        await createFamilyMember({
+          familyRelation: familyRelation as FamilyRelation,
+          familyId: selectedKK.id,
+          residentId: res?.data?.id,
+        })
+      }
 
       setMessage(res?.message)
       router.push("/residents")
@@ -98,6 +120,32 @@ const Form = () => {
         </Alert>
       )}
       <form onSubmit={handleSubmit} className="grid gap-4">
+        <div className="grid gap-2">
+          <Label>Nomor KK</Label>
+          <SearchableKKSelect value={selectedKK} onChange={setSelectedKK} />
+        </div>
+        <div className="grid gap-2">
+          <Label>Status Hubungan Dalam Keluarga</Label>
+          <Select
+            onValueChange={(value: string) =>
+              setFamilyRelation(value as FamilyRelation)
+            }
+            value={familyRelation}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih hubungan dalam keluarga" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="KEPALA_KELUARGA">Kepala Keluarga</SelectItem>
+              <SelectItem value="SUAMI">Suami</SelectItem>
+              <SelectItem value="ISTRI">Istri</SelectItem>
+              <SelectItem value="ANAK">Anak</SelectItem>
+              <SelectItem value="ORANG_TUA">Orang Tua</SelectItem>
+              <SelectItem value="MERTUA">Mertua</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="nik">Nomor Induk Kependudukan (NIK)</Label>
           <Input
@@ -136,20 +184,30 @@ const Form = () => {
           <CustomDatePicker date={birthDate} setDate={setBirthDate} />
         </div>
         <div className="grid gap-2">
-          <Select onValueChange={setGender} value={gender} required>
+          <Label>Jenis Kelamin</Label>
+          <Select
+            onValueChange={(value: string) => setGender(value as Gender)}
+            value={gender}
+            required
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Jenis Kelamin" />
+              <SelectValue placeholder="Pilih jenis kelamin" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="MALE">Laki-Laki</SelectItem>
-              <SelectItem value="FEMALE">Wanita</SelectItem>
+              <SelectItem value="FEMALE">Perempuan</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="grid gap-2">
-          <Select onValueChange={setReligion} value={religion} required>
+          <Label>Agama</Label>
+          <Select
+            onValueChange={(value: string) => setReligion(value as Religion)}
+            value={religion}
+            required
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Agama" />
+              <SelectValue placeholder="Pilih agama" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ISLAM">Islam</SelectItem>
@@ -163,9 +221,14 @@ const Form = () => {
           </Select>
         </div>
         <div className="grid gap-2">
-          <Select onValueChange={setEducation} value={education} required>
+          <Label>Pendidikan</Label>
+          <Select
+            onValueChange={(value: string) => setEducation(value as Education)}
+            value={education}
+            required
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Pendidikan" />
+              <SelectValue placeholder="Pilih pendidikan" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="SD">SD</SelectItem>
@@ -193,13 +256,16 @@ const Form = () => {
           />
         </div>
         <div className="grid gap-2">
+          <Label>Status Pernikahan</Label>
           <Select
-            onValueChange={setMarriageStatus}
+            onValueChange={(value: string) =>
+              setMarriageStatus(value as MarriageStatus)
+            }
             value={marriageStatus}
             required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Status Pernikahan" />
+              <SelectValue placeholder="Pilih status pernikahan" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="BELUM_KAWIN">Belum Kawin</SelectItem>
@@ -210,9 +276,16 @@ const Form = () => {
           </Select>
         </div>
         <div className="grid gap-2">
-          <Select onValueChange={setNationality} value={nationality} required>
+          <Label>Kewarganegaraan</Label>
+          <Select
+            onValueChange={(value: string) =>
+              setNationality(value as Nationality)
+            }
+            value={nationality}
+            required
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Kewarganegaraan" />
+              <SelectValue placeholder="Pilih kewarganegaraan" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="WNI">WNI</SelectItem>

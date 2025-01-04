@@ -1,3 +1,11 @@
+import {
+  Education,
+  Gender,
+  MarriageStatus,
+  Nationality,
+  Religion,
+} from "generated/client"
+
 export interface Resident {
   id: string
   nik: string
@@ -11,55 +19,6 @@ export interface Resident {
   marriageStatus: MarriageStatus
   nationality: Nationality
   phone?: string
-}
-
-enum Gender {
-  MALE,
-  FEMALE,
-}
-
-enum Religion {
-  ISLAM,
-  KRISTEN,
-  HINDU,
-  BUDHA,
-  KATOLIK,
-  KONGHUCU,
-  OTHERS,
-}
-
-enum Education {
-  SD,
-  SMP,
-  SMA_SMK,
-  D1,
-  D2,
-  D3,
-  D4,
-  S1,
-  S2,
-  S3,
-}
-
-enum MarriageStatus {
-  BELUM_KAWIN,
-  KAWIN,
-  CERAI_HIDUP,
-  CERAI_MATI,
-}
-
-enum Nationality {
-  WNI,
-  WNA,
-}
-
-enum FamilyRelation {
-  KEPALA_KELUARGA,
-  SUAMI,
-  ISTRI,
-  ANAK,
-  ORANG_TUA,
-  MERTUA,
 }
 
 export interface ResidentResponse {

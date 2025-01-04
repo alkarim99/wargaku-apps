@@ -57,3 +57,7 @@ export const updateFamily = (
 export const deleteFamily = (id: string): Promise<FamilyResponse> => {
   return apiCall<FamilyResponse>("delete", `/family/${id}`)
 }
+
+export const getAllKkNumber = (): Promise<FamilyResponse> => {
+  return apiCall<FamilyResponse>("get", "/family/kk-number")
+}

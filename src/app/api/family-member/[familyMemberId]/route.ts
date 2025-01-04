@@ -1,11 +1,8 @@
 import prisma from "@/lib/db"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import {
-  getDetailFamilyMemberSchema,
-  deleteFamilyMemberSchema,
-} from "@/schemas/familyMember"
+import { getDetailFamilyMemberSchema } from "@/schemas/familyMember"
 
 export async function GET(
   req: Request,

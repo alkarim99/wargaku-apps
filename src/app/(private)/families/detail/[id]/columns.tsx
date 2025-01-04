@@ -165,14 +165,6 @@ export const residentsColumn: ColumnDef<Residents>[] = [
     },
   },
   {
-    accessorKey: "familyMember",
-    header: "Nomor KK",
-    cell: ({ row }) => {
-      const familyMember = row.getValue("familyMember") as any
-      return familyMember?.family?.kkNumber
-    },
-  },
-  {
     id: "actions",
     cell: ({ row }) => <ActionCell resident={row.original} />,
   },

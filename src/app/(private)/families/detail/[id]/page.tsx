@@ -10,7 +10,7 @@ import { getFamilyById, deleteFamily } from "@/lib/family/actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, XCircleIcon } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { DataTable } from "@/components/ui/data-table"
+import { residentsColumn } from "./columns"
 
 interface DetailFamilyPageProps {
   params: {
@@ -54,10 +57,22 @@ export default function Page({ params }: DetailFamilyPageProps) {
   const [province, setProvince] = useState("")
   const [postalCode, setPostalCode] = useState("")
   const [publishDate, setPublishDate] = useState("")
+  const [residentsData, setResidentsData] = useState([])
+  const [errorMessage, setErrorMessage] = useState("")
 
   useEffect(() => {
     if (!session) {
       redirect("/login")
+    }
+
+    const getResidents = async (familyMembers: any) => {
+      let residents: any = []
+      if (familyMembers) {
+        familyMembers.map((member: any) => {
+          residents.push(member.resident)
+        })
+        return residents
+      }
     }
 
     const fetchData = async () => {
@@ -74,6 +89,7 @@ export default function Page({ params }: DetailFamilyPageProps) {
           setProvince(family?.data?.province)
           setPostalCode(family?.data?.postalCode)
           setPublishDate(family?.data?.publishDate)
+          setResidentsData(await getResidents(family?.data?.familyMembers))
         } catch (error: any) {
           console.log(error.response)
         }
@@ -92,8 +108,9 @@ export default function Page({ params }: DetailFamilyPageProps) {
       await deleteFamily(params.id)
       router.push("/families")
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting family:", error)
+      setErrorMessage(error?.message)
     }
   }
 
@@ -102,7 +119,14 @@ export default function Page({ params }: DetailFamilyPageProps) {
       <Header />
       <main className="flex min-h-[calc(100vh-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
         <div className="mx-auto w-full max-w-4xl">
-          <Card>
+          {errorMessage && (
+            <Alert variant="destructive" className="mb-4">
+              <XCircleIcon className="h-4 w-4" />
+              <AlertTitle>Error!</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+          <Card className="mb-8">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-2xl">
@@ -185,6 +209,18 @@ export default function Page({ params }: DetailFamilyPageProps) {
                     />
                   </dl>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Anggota Keluarga</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mx-auto grid w-full max-w-6xl items-start gap-6 ">
+                <DataTable columns={residentsColumn} data={residentsData} />
               </div>
             </CardContent>
           </Card>

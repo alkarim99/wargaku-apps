@@ -20,6 +20,20 @@ interface FormProps {
   id: string
 }
 import CustomDatePicker from "@/components/admin/custom-datepicker"
+import {
+  Education,
+  FamilyRelation,
+  Gender,
+  MarriageStatus,
+  Nationality,
+  Religion,
+} from "generated/client"
+import SearchableKKSelect from "@/components/admin/custom-select"
+import {
+  createFamilyMember,
+  updateFamilyMember,
+  deleteFamilyMember,
+} from "@/lib/family-member/actions"
 
 const Form: React.FC<FormProps> = ({ id, ...props }) => {
   const router = useRouter()
@@ -28,12 +42,23 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
   const [name, setName] = useState("")
   const [birthPlace, setBirthPlace] = useState("")
   const [birthDate, setBirthDate] = useState<Date>()
-  const [gender, setGender] = useState("")
-  const [religion, setReligion] = useState("")
-  const [education, setEducation] = useState("")
+  const [gender, setGender] = useState<Gender>()
+  const [religion, setReligion] = useState<Religion>()
+  const [education, setEducation] = useState<Education>()
   const [work, setWork] = useState("")
-  const [marriageStatus, setMarriageStatus] = useState("")
-  const [nationality, setNationality] = useState("")
+  const [marriageStatus, setMarriageStatus] = useState<MarriageStatus>()
+  const [nationality, setNationality] = useState<Nationality>()
+  const [familyMemberId, setFamilyMemberId] = useState<string>()
+  const [selectedKK, setSelectedKK] = useState<{
+    id: string
+    kkNumber: string
+  } | null>(null)
+  const [oldSelectedKK, setOldSelectedKK] = useState<{
+    id: string
+    kkNumber: string
+  } | null>(null)
+  const [familyRelation, setFamilyRelation] = useState<FamilyRelation>()
+  const [oldFamilyRelation, setOldFamilyRelation] = useState<FamilyRelation>()
 
   const [message, setMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
@@ -55,6 +80,17 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
           setWork(resident?.data?.work)
           setMarriageStatus(resident?.data?.marriageStatus)
           setNationality(resident?.data?.nationality)
+          setFamilyMemberId(resident?.data?.familyMember?.id)
+          setSelectedKK({
+            id: resident?.data?.familyMember?.family?.id,
+            kkNumber: resident?.data?.familyMember?.family?.kkNumber,
+          })
+          setOldSelectedKK({
+            id: resident?.data?.familyMember?.family?.id,
+            kkNumber: resident?.data?.familyMember?.family?.kkNumber,
+          })
+          setFamilyRelation(resident?.data?.familyMember?.familyRelation)
+          setOldFamilyRelation(resident?.data?.familyMember?.familyRelation)
         } catch (error: any) {
           console.log(error.response)
         } finally {
@@ -96,13 +132,26 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         name,
         birthPlace,
         birthDate: birthDate as Date,
-        gender,
-        religion,
-        education,
+        gender: gender as Gender,
+        religion: religion as Religion,
+        education: education as Education,
         work,
-        marriageStatus,
-        nationality,
+        marriageStatus: marriageStatus as MarriageStatus,
+        nationality: nationality as Nationality,
       })
+
+      if (
+        selectedKK &&
+        (selectedKK.id !== oldSelectedKK?.id ||
+          familyRelation !== oldFamilyRelation)
+      ) {
+        await updateFamilyMember({
+          id: familyMemberId as string,
+          familyRelation: familyRelation as FamilyRelation,
+          familyId: selectedKK.id,
+          residentId: id,
+        })
+      }
 
       setMessage(res?.message)
       router.push("/residents")
@@ -130,6 +179,32 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         </Alert>
       )}
       <form onSubmit={handleSubmit} className="grid gap-4">
+        <div className="grid gap-2">
+          <Label>Nomor KK</Label>
+          <SearchableKKSelect value={selectedKK} onChange={setSelectedKK} />
+        </div>
+        <div className="grid gap-2">
+          <Label>Status Hubungan Dalam Keluarga</Label>
+          <Select
+            onValueChange={(value: string) =>
+              setFamilyRelation(value as FamilyRelation)
+            }
+            value={familyRelation}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih hubungan dalam keluarga" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="KEPALA_KELUARGA">Kepala Keluarga</SelectItem>
+              <SelectItem value="SUAMI">Suami</SelectItem>
+              <SelectItem value="ISTRI">Istri</SelectItem>
+              <SelectItem value="ANAK">Anak</SelectItem>
+              <SelectItem value="ORANG_TUA">Orang Tua</SelectItem>
+              <SelectItem value="MERTUA">Mertua</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="nik">Nomor Induk Kependudukan (NIK)</Label>
           <Input
@@ -172,7 +247,7 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         </div>
         <div className="grid gap-2">
           <Select
-            onValueChange={setGender}
+            onValueChange={(value: string) => setGender(value as Gender)}
             value={gender}
             defaultValue={gender}
             required
@@ -182,13 +257,13 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="MALE">Laki-Laki</SelectItem>
-              <SelectItem value="FEMALE">Wanita</SelectItem>
+              <SelectItem value="FEMALE">Perempuan</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="grid gap-2">
           <Select
-            onValueChange={setReligion}
+            onValueChange={(value: string) => setReligion(value as Religion)}
             value={religion}
             defaultValue={religion}
             required
@@ -209,7 +284,7 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         </div>
         <div className="grid gap-2">
           <Select
-            onValueChange={setEducation}
+            onValueChange={(value: string) => setEducation(value as Education)}
             value={education}
             defaultValue={education}
             required
@@ -245,7 +320,9 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         </div>
         <div className="grid gap-2">
           <Select
-            onValueChange={setMarriageStatus}
+            onValueChange={(value: string) =>
+              setMarriageStatus(value as MarriageStatus)
+            }
             value={marriageStatus}
             defaultValue={marriageStatus}
             required
@@ -263,7 +340,9 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         </div>
         <div className="grid gap-2">
           <Select
-            onValueChange={setNationality}
+            onValueChange={(value: string) =>
+              setNationality(value as Nationality)
+            }
             value={nationality}
             defaultValue={nationality}
             required
