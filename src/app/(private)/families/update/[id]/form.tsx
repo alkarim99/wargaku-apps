@@ -8,6 +8,7 @@ import Spinner from "@/components/spinner"
 import { updateFamilySchema } from "@/schemas/family"
 import { getFamilyById, updateFamily } from "@/lib/family/actions"
 import { useRouter } from "next/navigation"
+import CustomDatePicker from "@/components/admin/custom-datepicker"
 
 interface FormProps {
   id: string
@@ -25,8 +26,9 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
   const [city, setCity] = useState("")
   const [province, setProvince] = useState("")
   const [postalCode, setPostalCode] = useState("")
-  const [publishDate, setPublishDate] = useState("")
+  const [publishDate, setPublishDate] = useState<Date>()
 
+  const [message, setMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -92,25 +94,27 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
         city,
         province,
         postalCode,
-        publishDate,
+        publishDate: publishDate as Date,
       })
-      console.log(res)
-      if (res?.message !== "Family updated successfully.") {
-        setErrorMessage(res?.message)
-      } else {
-        setErrorMessage("")
-      }
-    } catch (error) {
-      setErrorMessage("An unexpected error occurred. Please try again.")
-    } finally {
-      setLoading(false)
+
+      setMessage(res?.message)
       router.push("/families")
       router.refresh()
+    } catch (error: any) {
+      setErrorMessage(error?.message)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <>
+      {message && (
+        <Alert className="text-green-600 border-green-600 mb-4">
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
       {errorMessage && (
         <Alert variant="destructive" className="mb-4">
           <XCircleIcon className="h-4 w-4" />
@@ -130,6 +134,10 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
             onChange={(e) => setKkNumber(e.target.value)}
             required
           />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="publishDate">Tanggal Terbit</Label>
+          <CustomDatePicker date={publishDate} setDate={setPublishDate} />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="address">Alamat Rumah</Label>
@@ -224,22 +232,6 @@ const Form: React.FC<FormProps> = ({ id, ...props }) => {
             value={postalCode}
             defaultValue={postalCode}
             onChange={(e) => setPostalCode(e.target.value)}
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="postalCode">Tanggal Terbit</Label>
-          <Input
-            id="publishDate"
-            type="date"
-            value={
-              publishDate
-                ? new Date(publishDate).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={(e) => {
-              setPublishDate(e.target.value)
-            }}
             required
           />
         </div>

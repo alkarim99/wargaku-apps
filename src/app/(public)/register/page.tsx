@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import { useSession } from "next-auth/react";
-import React, { useEffect } from "react";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import Form from "./form";
-import LoginButton from "@/components/login-button";
-import TermsPrivacy from "@/components/terms-privacy";
-import AuthLayout from "@/components/auth-layout";
+import { useSession } from "next-auth/react"
+import React, { useEffect } from "react"
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import Form from "./form"
+import LoginButton from "@/components/login-button"
+import TermsPrivacy from "@/components/terms-privacy"
+import AuthLayout from "@/components/auth-layout"
 
 const Page = () => {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
   useEffect(() => {
     if (session) {
-      redirect("/dashboard");
+      redirect("/dashboard")
     }
-  }, [session]);
+  }, [session])
 
   return (
     <AuthLayout>
@@ -25,7 +25,7 @@ const Page = () => {
       </div>
       <Form />
       <div className="grid gap-4">
-        <LoginButton />
+        {/* <LoginButton /> */}
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="underline">
@@ -35,7 +35,7 @@ const Page = () => {
       </div>
       <TermsPrivacy />
     </AuthLayout>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

@@ -5,11 +5,11 @@ import { authOptions } from "@/lib/auth"
 import { createResidentSchema, updateResidentSchema } from "@/schemas/resident"
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
+  // const session = await getServerSession(authOptions)
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
-  }
+  // if (!session?.user?.email) {
+  //   return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
+  // }
 
   try {
     const residents = await prisma.resident.findMany({

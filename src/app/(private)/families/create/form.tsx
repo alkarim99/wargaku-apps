@@ -7,8 +7,8 @@ import { XCircleIcon } from "lucide-react"
 import Spinner from "@/components/spinner"
 import { createFamilySchema } from "@/schemas/family"
 import { createFamily } from "@/lib/family/actions"
-import { redirect } from "next/navigation"
 import { useRouter } from "next/navigation"
+import CustomDatePicker from "@/components/admin/custom-datepicker"
 
 const Form = () => {
   const router = useRouter()
@@ -22,8 +22,9 @@ const Form = () => {
   const [city, setCity] = useState("")
   const [province, setProvince] = useState("")
   const [postalCode, setPostalCode] = useState("")
-  const [publishDate, setPublishDate] = useState<Date>(new Date())
+  const [publishDate, setPublishDate] = useState<Date>()
 
+  const [message, setMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -60,26 +61,27 @@ const Form = () => {
         city,
         province,
         postalCode,
-        publishDate,
+        publishDate: publishDate as Date,
       })
 
-      if (res?.status !== 200) {
-        setErrorMessage(res?.message)
-      } else {
-        setErrorMessage("")
-      }
-    } catch (error) {
-      setErrorMessage("An unexpected error occurred. Please try again.")
-    } finally {
-      setLoading(false)
-      // redirect("/families")
+      setMessage(res?.message)
       router.push("/families")
       router.refresh()
+    } catch (error: any) {
+      setErrorMessage(error?.message)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <>
+      {message && (
+        <Alert className="text-green-600 border-green-600 mb-4">
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
       {errorMessage && (
         <Alert variant="destructive" className="mb-4">
           <XCircleIcon className="h-4 w-4" />
@@ -98,6 +100,10 @@ const Form = () => {
             onChange={(e) => setKkNumber(e.target.value)}
             required
           />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="publishDate">Tanggal Terbit</Label>
+          <CustomDatePicker date={publishDate} setDate={setPublishDate} />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="address">Alamat Rumah</Label>
@@ -185,19 +191,6 @@ const Form = () => {
             value={postalCode}
             onChange={(e) => setPostalCode(e.target.value)}
             required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="postalCode">Tanggal Terbit</Label>
-          <Input
-            id="publishDate"
-            type="date"
-            // Format the Date object to YYYY-MM-DD for the input
-            value={publishDate.toISOString().split("T")[0]}
-            onChange={(e) => {
-              // Convert the string date to a Date object
-              setPublishDate(new Date(e.target.value))
-            }}
           />
         </div>
 
