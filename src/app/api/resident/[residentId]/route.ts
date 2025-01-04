@@ -23,6 +23,20 @@ export async function GET(
 
     const resident = await prisma.resident.findUnique({
       where: { id },
+      include: {
+        familyMember: {
+          select: {
+            id: true,
+            familyRelation: true,
+            family: {
+              select: {
+                id: true,
+                kkNumber: true,
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!resident) {

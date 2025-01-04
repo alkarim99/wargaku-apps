@@ -1,5 +1,5 @@
 import prisma from "@/lib/db"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDetailFamilySchema, deleteFamilySchema } from "@/schemas/family"
@@ -20,6 +20,33 @@ export async function GET(
 
     const family = await prisma.family.findUnique({
       where: { id },
+      select: {
+        id: true,
+        kkNumber: true,
+        address: true,
+        rt: true,
+        rw: true,
+        subDistrict: true,
+        district: true,
+        city: true,
+        province: true,
+        postalCode: true,
+        publishDate: true,
+        familyMembers: {
+          select: {
+            familyRelation: true,
+            resident: {
+              select: {
+                id: true,
+                nik: true,
+                name: true,
+                birthDate: true,
+                gender: true,
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!family) {
@@ -53,16 +80,30 @@ export async function DELETE(
     const { familyId } = params
     const { id } = deleteFamilySchema.parse({ id: familyId })
 
-    const family = await prisma.family.delete({
+    const familyData = await prisma.family.findUnique({
       where: { id },
+      include: {
+        familyMembers: true,
+      },
     })
 
-    if (!family) {
+    if (!familyData) {
       return NextResponse.json(
         { message: "Family not found." },
         { status: 404 }
       )
     }
+
+    if (familyData.familyMembers.length > 0) {
+      return NextResponse.json(
+        { message: "Family has family members." },
+        { status: 400 }
+      )
+    }
+
+    const family = await prisma.family.delete({
+      where: { id },
+    })
 
     return NextResponse.json(
       { message: "Family deleted successfully." },

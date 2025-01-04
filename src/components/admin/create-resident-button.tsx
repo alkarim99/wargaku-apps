@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
-export function AddFamilyButton() {
+export function AddResidentButton() {
   const router = useRouter()
 
   return (
-    <Button onClick={() => router.push("/families/create")}>Tambah Data</Button>
+    <Button onClick={() => router.push("/residents/create")}>
+      Tambah Data
+    </Button>
   )
 }

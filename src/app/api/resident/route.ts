@@ -5,12 +5,6 @@ import { authOptions } from "@/lib/auth"
 import { createResidentSchema, updateResidentSchema } from "@/schemas/resident"
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
-  }
-
   try {
     const residents = await prisma.resident.findMany({
       select: {
@@ -19,6 +13,17 @@ export async function GET() {
         name: true,
         birthDate: true,
         gender: true,
+        familyMember: {
+          select: {
+            family: {
+              select: {
+                id: true,
+                kkNumber: true,
+              },
+            },
+            familyRelation: true,
+          },
+        },
       },
     })
 
@@ -61,7 +66,7 @@ export async function POST(req: NextRequest) {
       phone,
     } = createResidentSchema.parse(await req.json())
 
-    await prisma.resident.create({
+    const resident = await prisma.resident.create({
       data: {
         nik,
         name,
@@ -80,7 +85,7 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "Resident created successfully." },
+      { message: "Resident created successfully.", data: resident },
       { status: 201 }
     )
   } catch (error) {

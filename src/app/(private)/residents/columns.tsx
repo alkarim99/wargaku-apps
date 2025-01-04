@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,34 +23,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteFamily } from "@/lib/family/actions"
+import { deleteResident } from "@/lib/resident/actions"
 
-export type Families = {
+export type Residents = {
   id: string
-  kkNumber: string
-  address: string
-  rt: string
-  rw: string
-  numberOfFamily: number
+  nik: string
+  name: string
+  birthDate: string
+  gender: string
+  familyRelation: string
 }
 
-const ActionCell = ({ family }: { family: Families }) => {
+const ActionCell = ({ resident }: { resident: Residents }) => {
   const router = useRouter()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDetail = (id: string) => {
-    router.push(`/families/detail/${id}`)
+    router.push(`/residents/detail/${id}`)
   }
 
   const handleEdit = (id: string) => {
-    router.push(`/families/update/${id}`)
+    router.push(`/residents/update/${id}`)
   }
 
   const handleDelete = async (id: string) => {
     try {
       setIsDeleting(true)
-      await deleteFamily(id)
+      await deleteResident(id)
       setIsDeleteDialogOpen(false)
       window.location.reload()
     } catch (error) {
@@ -72,17 +72,17 @@ const ActionCell = ({ family }: { family: Families }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleDetail(family.id)}>
-            Lihat Kartu Keluarga
+          <DropdownMenuItem onClick={() => handleDetail(resident.id)}>
+            Lihat Warga
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleEdit(family.id)}>
-            Ubah Kartu Keluarga
+          <DropdownMenuItem onClick={() => handleEdit(resident.id)}>
+            Ubah Warga
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setIsDeleteDialogOpen(true)}
             className="text-destructive"
           >
-            Hapus Kartu Keluarga
+            Hapus Warga
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -105,14 +105,14 @@ const ActionCell = ({ family }: { family: Families }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus Kartu Keluarga dengan nomor{" "}
-              {family.kkNumber}? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus Warga dengan NIK {resident.nik}?
+              Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => handleDelete(family?.id)}
+              onClick={() => handleDelete(resident?.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
@@ -125,39 +125,55 @@ const ActionCell = ({ family }: { family: Families }) => {
   )
 }
 
-export const familiesColumn: ColumnDef<Families>[] = [
+const calculateAge = (birthDate: Date | string): number => {
+  const birth = new Date(birthDate)
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+
+  return age
+}
+
+export const residentsColumn: ColumnDef<Residents>[] = [
   {
-    accessorKey: "kkNumber",
-    header: "Nomor KK",
+    accessorKey: "nik",
+    header: "NIK",
   },
   {
-    accessorKey: "address",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Alamat
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
+    accessorKey: "name",
+    header: "Nama",
+  },
+  {
+    accessorKey: "birthDate",
+    header: "Usia",
+    cell: ({ row }) => {
+      const birthDate = row.getValue("birthDate") as string
+      const age = calculateAge(birthDate)
+      return `${age} tahun`
     },
   },
   {
-    accessorKey: "rt",
-    header: "RT",
+    accessorKey: "gender",
+    header: "Jenis Kelamin",
+    cell: ({ row }) => {
+      const gender = row.getValue("gender") as string
+      return gender === "MALE" ? "Laki-laki" : "Perempuan"
+    },
   },
   {
-    accessorKey: "rw",
-    header: "RW",
-  },
-  {
-    accessorKey: "numberOfFamily",
-    header: "Jumlah Anggota Keluarga",
+    accessorKey: "familyMember",
+    header: "Nomor KK",
+    cell: ({ row }) => {
+      const familyMember = row.getValue("familyMember") as any
+      return familyMember?.family?.kkNumber
+    },
   },
   {
     id: "actions",
-    cell: ({ row }) => <ActionCell family={row.original} />,
+    cell: ({ row }) => <ActionCell resident={row.original} />,
   },
 ]

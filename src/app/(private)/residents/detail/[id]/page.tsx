@@ -7,10 +7,11 @@ import { redirect } from "next/navigation"
 import Header from "@/components/admin/header"
 import Footer from "@/components/footer"
 import { getFamilyById, deleteFamily } from "@/lib/family/actions"
+import { getResidentById, deleteResident } from "@/lib/resident/actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, XCircleIcon } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +23,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { DataTable } from "@/components/ui/data-table"
-import { residentsColumn } from "./columns"
+import { set } from "date-fns"
 
-interface DetailFamilyPageProps {
+interface DetailResidentPageProps {
   params: {
     id: string
   }
@@ -44,7 +43,7 @@ const InfoItem = ({ label, value }: InfoItemProps) => (
   </div>
 )
 
-export default function Page({ params }: DetailFamilyPageProps) {
+export default function Page({ params }: DetailResidentPageProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const [kkNumber, setKkNumber] = useState("")
@@ -57,39 +56,37 @@ export default function Page({ params }: DetailFamilyPageProps) {
   const [province, setProvince] = useState("")
   const [postalCode, setPostalCode] = useState("")
   const [publishDate, setPublishDate] = useState("")
-  const [residentsData, setResidentsData] = useState([])
-  const [errorMessage, setErrorMessage] = useState("")
+
+  const [nik, setNik] = useState("")
+  const [name, setName] = useState("")
+  const [birthPlace, setBirthPlace] = useState("")
+  const [birthDate, setBirthDate] = useState<Date>()
+  const [gender, setGender] = useState("")
+  const [religion, setReligion] = useState("")
+  const [education, setEducation] = useState("")
+  const [work, setWork] = useState("")
+  const [marriageStatus, setMarriageStatus] = useState("")
+  const [nationality, setNationality] = useState("")
 
   useEffect(() => {
     if (!session) {
       redirect("/login")
     }
 
-    const getResidents = async (familyMembers: any) => {
-      let residents: any = []
-      if (familyMembers) {
-        familyMembers.map((member: any) => {
-          residents.push(member.resident)
-        })
-        return residents
-      }
-    }
-
     const fetchData = async () => {
       if (params.id) {
         try {
-          const family = await getFamilyById(params.id)
-          setKkNumber(family?.data?.kkNumber)
-          setAddress(family?.data?.address)
-          setRt(family?.data?.rt)
-          setRw(family?.data?.rw)
-          setSubDistrict(family?.data?.subDistrict)
-          setDistrict(family?.data?.district)
-          setCity(family?.data?.city)
-          setProvince(family?.data?.province)
-          setPostalCode(family?.data?.postalCode)
-          setPublishDate(family?.data?.publishDate)
-          setResidentsData(await getResidents(family?.data?.familyMembers))
+          const resident = await getResidentById(params.id)
+          setNik(resident?.data?.nik)
+          setName(resident?.data?.name)
+          setBirthPlace(resident?.data?.birthPlace)
+          setBirthDate(resident?.data?.birthDate)
+          setGender(resident?.data?.gender)
+          setReligion(resident?.data?.religion)
+          setEducation(resident?.data?.education)
+          setWork(resident?.data?.work)
+          setMarriageStatus(resident?.data?.marriageStatus)
+          setNationality(resident?.data?.nationality)
         } catch (error: any) {
           console.log(error.response)
         }
@@ -99,18 +96,43 @@ export default function Page({ params }: DetailFamilyPageProps) {
     fetchData()
   }, [session, params.id])
 
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "-"
+
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ]
+
+    const d = new Date(date)
+    const day = d.getDate().toString().padStart(2, "0")
+    const month = months[d.getMonth()]
+    const year = d.getFullYear()
+
+    return `${day} ${month} ${year}`
+  }
+
   const handleEdit = () => {
-    router.push(`/families/update/${params.id}`)
+    router.push(`/residents/update/${params.id}`)
   }
 
   const handleDelete = async () => {
     try {
-      await deleteFamily(params.id)
-      router.push("/families")
+      await deleteResident(params.id)
+      router.push("/residents")
       router.refresh()
-    } catch (error: any) {
-      console.error("Error deleting family:", error)
-      setErrorMessage(error?.message)
+    } catch (error) {
+      console.error("Error deleting resident:", error)
     }
   }
 
@@ -119,21 +141,12 @@ export default function Page({ params }: DetailFamilyPageProps) {
       <Header />
       <main className="flex min-h-[calc(100vh-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
         <div className="mx-auto w-full max-w-4xl">
-          {errorMessage && (
-            <Alert variant="destructive" className="mb-4">
-              <XCircleIcon className="h-4 w-4" />
-              <AlertTitle>Error!</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-          <Card className="mb-8">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">
-                  Detail Kartu Keluarga
-                </CardTitle>
+                <CardTitle className="text-2xl">Detail Warga</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Nomor KK: {kkNumber}
+                  Nomor Induk Kependudukan (NIK): {nik}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -159,8 +172,8 @@ export default function Page({ params }: DetailFamilyPageProps) {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Apakah Anda yakin ingin menghapus data kartu keluarga
-                        ini? Tindakan ini tidak dapat dibatalkan.
+                        Apakah Anda yakin ingin menghapus data warga ini?
+                        Tindakan ini tidak dapat dibatalkan.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -179,48 +192,44 @@ export default function Page({ params }: DetailFamilyPageProps) {
             <CardContent>
               <div className="grid gap-6">
                 <div>
-                  <h3 className="font-semibold">Informasi Alamat</h3>
+                  <h3 className="font-semibold">Informasi Pribadi</h3>
                   <Separator className="my-4" />
                   <dl className="grid gap-4 sm:grid-cols-2">
-                    <InfoItem label="Alamat Lengkap" value={address} />
-                    <div className="grid grid-cols-2 gap-4">
-                      <InfoItem label="RT" value={rt} />
-                      <InfoItem label="RW" value={rw} />
-                    </div>
-                    <InfoItem label="Kelurahan" value={subDistrict} />
-                    <InfoItem label="Kecamatan" value={district} />
-                    <InfoItem label="Kota" value={city} />
-                    <InfoItem label="Provinsi" value={province} />
-                    <InfoItem label="Kode Pos" value={postalCode} />
+                    <InfoItem label="NIK" value={nik} />
+                    <InfoItem label="Nama" value={name} />
+                    <InfoItem
+                      label="Jenis Kelamin"
+                      value={gender == "MALE" ? "Laki-laki" : "Perempuan"}
+                    />
+                    <InfoItem label="Kewarganegaraan" value={nationality} />
                   </dl>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold">Informasi Dokumen</h3>
+                  <h3 className="font-semibold">Informasi Lahir</h3>
                   <Separator className="my-4" />
-                  <dl className="grid gap-4">
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <InfoItem label="Tempat Lahir" value={birthPlace} />
                     <InfoItem
-                      label="Tanggal Terbit"
-                      value={new Date(publishDate).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      label="Tanggal Lahir"
+                      value={formatDate(birthDate)}
                     />
                   </dl>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-2xl">Anggota Keluarga</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mx-auto grid w-full max-w-6xl items-start gap-6 ">
-                <DataTable columns={residentsColumn} data={residentsData} />
+
+                <div>
+                  <h3 className="font-semibold">Informasi Lainnya</h3>
+                  <Separator className="my-4" />
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <InfoItem label="Agama" value={religion} />
+                    <InfoItem label="Pendidikan" value={education} />
+                    <InfoItem label="Pekerjaan" value={work} />
+                    <InfoItem
+                      label="Status Pernikahan"
+                      value={marriageStatus}
+                    />
+                  </dl>
+                </div>
               </div>
             </CardContent>
           </Card>

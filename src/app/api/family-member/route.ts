@@ -6,14 +6,13 @@ import {
   createFamilyMemberSchema,
   updateFamilyMemberSchema,
 } from "@/schemas/familyMember"
-import { connect } from "http2"
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
+  // const session = await getServerSession(authOptions)
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
-  }
+  // if (!session?.user?.email) {
+  //   return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
+  // }
 
   try {
     const familyMembers = await prisma.familyMember.findMany({

@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth"
 import { BookA, Users, Home } from "lucide-react"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
+import { getAllFamily } from "@/lib/family/actions"
+import { getAllResident } from "@/lib/resident/actions"
 
 export default async function Page() {
   const session = await getServerSession(authOptions)
@@ -12,6 +14,12 @@ export default async function Page() {
   if (!session) {
     redirect("/login")
   }
+
+  const familiesData = await getAllFamily()
+  const totalFamilies = familiesData?.data?.length
+
+  const residentsData = await getAllResident()
+  const totalResidents = residentsData?.data?.length
 
   return (
     <>
@@ -27,12 +35,12 @@ export default async function Page() {
             <Alert>
               <BookA className="h-4 w-4" />
               <AlertTitle>Total Kartu Keluarga</AlertTitle>
-              <AlertDescription>248 KK</AlertDescription>
+              <AlertDescription>{totalFamilies} KK</AlertDescription>
             </Alert>
             <Alert>
               <Users className="h-4 w-4" />
               <AlertTitle>Total Warga</AlertTitle>
-              <AlertDescription>1024 Jiwa</AlertDescription>
+              <AlertDescription>{totalResidents} Jiwa</AlertDescription>
             </Alert>
             <Alert>
               <Home className="h-4 w-4" />
@@ -40,7 +48,7 @@ export default async function Page() {
               <AlertDescription>12 RT</AlertDescription>
             </Alert>
           </div>
-          <div className="mx-auto grid w-full max-w-6xl gap-2">
+          {/* <div className="mx-auto grid w-full max-w-6xl gap-2">
             <h2 className="text-xl font-semibold">Aktivitas Terbaru</h2>
           </div>
           <div className="mx-auto grid w-full max-w-6xl items-start gap-6 ">
@@ -52,7 +60,7 @@ export default async function Page() {
                 <p className="font-light">5 mnt ago</p>
               </AlertDescription>
             </Alert>
-          </div>
+          </div> */}
         </main>
         <Footer />
       </div>

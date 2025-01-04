@@ -5,12 +5,6 @@ import { authOptions } from "@/lib/auth"
 import { createFamilySchema, updateFamilySchema } from "@/schemas/family"
 
 export async function GET(request: Request) {
-  // const session = await getServerSession(authOptions)
-
-  // if (!session?.user?.email) {
-  //   return NextResponse.json({ message: "Unauthorized." }, { status: 401 })
-  // }
-
   try {
     const families = await prisma.family.findMany({
       include: {
