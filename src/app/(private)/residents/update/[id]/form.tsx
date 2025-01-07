@@ -29,11 +29,7 @@ import {
   Religion,
 } from "generated/client"
 import SearchableKKSelect from "@/components/admin/custom-select"
-import {
-  createFamilyMember,
-  updateFamilyMember,
-  deleteFamilyMember,
-} from "@/lib/family-member/actions"
+import { updateFamilyMember } from "@/lib/family-member/actions"
 
 const Form: React.FC<FormProps> = ({ id, ...props }) => {
   const router = useRouter()

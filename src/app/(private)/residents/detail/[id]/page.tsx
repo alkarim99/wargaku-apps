@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { redirect } from "next/navigation"
 import Header from "@/components/admin/header"
 import Footer from "@/components/footer"
-import { getFamilyById, deleteFamily } from "@/lib/family/actions"
 import { getResidentById, deleteResident } from "@/lib/resident/actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -23,7 +22,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { set } from "date-fns"
 
 interface DetailResidentPageProps {
   params: {
@@ -46,16 +44,6 @@ const InfoItem = ({ label, value }: InfoItemProps) => (
 export default function Page({ params }: DetailResidentPageProps) {
   const router = useRouter()
   const { data: session } = useSession()
-  const [kkNumber, setKkNumber] = useState("")
-  const [address, setAddress] = useState("")
-  const [rt, setRt] = useState("")
-  const [rw, setRw] = useState("")
-  const [subDistrict, setSubDistrict] = useState("")
-  const [district, setDistrict] = useState("")
-  const [city, setCity] = useState("")
-  const [province, setProvince] = useState("")
-  const [postalCode, setPostalCode] = useState("")
-  const [publishDate, setPublishDate] = useState("")
 
   const [nik, setNik] = useState("")
   const [name, setName] = useState("")
