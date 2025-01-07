@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
+import { revalidatePath } from "next/cache"
 import {
   CreateFamilyRequest,
   FamilyResponse,
@@ -25,7 +26,12 @@ const apiCall = async <T>(
   params?: any
 ): Promise<T> => {
   try {
-    const config: AxiosRequestConfig = { method, url, data, params }
+    const config: AxiosRequestConfig = {
+      method,
+      url,
+      data,
+      params,
+    }
     const response: AxiosResponse<T> = await axiosInstance.request<T>(config)
     return response.data
   } catch (error: any) {
@@ -58,6 +64,20 @@ export const deleteFamily = (id: string): Promise<FamilyResponse> => {
   return apiCall<FamilyResponse>("delete", `/family/${id}`)
 }
 
-export const getAllKkNumber = (): Promise<FamilyResponse> => {
-  return apiCall<FamilyResponse>("get", "/family/kk-number")
+export const getAllKkNumber = async (): Promise<FamilyResponse> => {
+  // Tambahkan timestamp untuk memastikan data selalu fresh
+  const response = await apiCall<FamilyResponse>(
+    "get",
+    "/family/kk-number",
+    null,
+    { _t: new Date().getTime() } // Parameter timestamp untuk mencegah caching
+  )
+
+  // Revalidasi path yang terkait dengan KK number
+  if (typeof window === "undefined") {
+    // Pastikan hanya dijalankan di server
+    revalidatePath("/residents")
+  }
+
+  return response
 }
