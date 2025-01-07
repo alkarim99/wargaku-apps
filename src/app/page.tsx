@@ -1,86 +1,55 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import Header from "@/components/header"
-import { BookA, Users, Home } from "lucide-react"
-import { getAllFamily } from "@/lib/family/actions"
+import { Announcement } from "@/components/announcement";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 import {
-  getAllResident,
-  getStatisticsGender,
-  getStatisticsAge,
-} from "@/lib/resident/actions"
+  PageActions,
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderHeading,
+} from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-export default async function LandingPage() {
-  const familiesData = await getAllFamily()
-  const totalFamilies = familiesData?.data?.length
-
-  const residentsData = await getAllResident()
-  const totalResidents = residentsData?.data?.length
-
-  const statisticsGender = await getStatisticsGender()
-  const statisticsAge = await getStatisticsAge()
+export default function LandingPage() {
   return (
     <>
       <Header />
-      <main className="flex min-h-[calc(100vh - _theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
-        <div className="mx-auto grid w-full max-w-6xl gap-2">
-          <h1 className="text-3xl font-semibold">
-            RW XI, Purwodadi, Blimbing, Kota Malang
-          </h1>
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-grow container flex flex-col justify-center relative">
+          <PageHeader>
+            <Announcement />
+            <PageHeaderHeading className="hidden md:block">
+              Discover Our Platform&apos;s Potential
+            </PageHeaderHeading>
+            <PageHeaderHeading className="md:hidden">
+              Welcome!
+            </PageHeaderHeading>
+            <PageHeaderDescription>
+              Explore a world of possibilities with BlackPepper. From
+              beautifully crafted dashboards to seamless authentication, our
+              platform offers a wealth of examples to ignite your creativity and
+              guide your journey towards building exceptional applications.
+            </PageHeaderDescription>
+            <PageActions>
+              <Link href="#" className={cn(buttonVariants(), "rounded-[6px]")}>
+                Get Started
+              </Link>
+              <Link
+                href="#"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "rounded-[6px]"
+                )}
+              >
+                Explore Components
+              </Link>
+            </PageActions>
+          </PageHeader>
+          <section>{/* Additional content can be added here */}</section>
         </div>
-        <div className="mx-auto grid lg:grid-cols-3 w-full max-w-6xl items-start gap-6 ">
-          <Alert>
-            <BookA className="h-4 w-4" />
-            <AlertTitle>Total Kartu Keluarga</AlertTitle>
-            <AlertDescription>{totalFamilies} KK</AlertDescription>
-          </Alert>
-          <Alert>
-            <Users className="h-4 w-4" />
-            <AlertTitle>Total Warga</AlertTitle>
-            <AlertDescription>{totalResidents} Jiwa</AlertDescription>
-          </Alert>
-          <Alert>
-            <Home className="h-4 w-4" />
-            <AlertTitle>Total Rukun Tetangga</AlertTitle>
-            <AlertDescription>10 RT</AlertDescription>
-          </Alert>
-          {statisticsGender &&
-            statisticsGender.data.map((data: any, index: number) => (
-              <Alert key={index}>
-                <Users className="h-4 w-4" />
-                <AlertTitle>
-                  {data.gender == "MALE" ? "Laki-laki" : "Perempuan"}
-                </AlertTitle>
-                <AlertDescription>{data.count} jiwa</AlertDescription>
-              </Alert>
-            ))}
-        </div>
-        <div className="mx-auto grid lg:grid-cols-3 w-full max-w-6xl items-start gap-6 ">
-          {statisticsAge &&
-            statisticsAge?.data?.map((data: any, index: number) => (
-              <Alert key={index}>
-                <Users className="h-4 w-4" />
-                <AlertTitle>{data.category}</AlertTitle>
-                <AlertDescription>
-                  {data.count} jiwa ({data.percentage}) <br />
-                  {data.maleCount} Laki-laki <br />
-                  {data.femaleCount} Perempuan
-                </AlertDescription>
-              </Alert>
-            ))}
-        </div>
-        {/* <div className="mx-auto grid w-full max-w-6xl gap-2">
-            <h2 className="text-xl font-semibold">Aktivitas Terbaru</h2>
-          </div>
-          <div className="mx-auto grid w-full max-w-6xl items-start gap-6 ">
-            <Alert>
-              <Users className="h-4 w-4" />
-              <AlertTitle>Kartu Keluarga Baru Terdaftar</AlertTitle>
-              <AlertDescription>
-                <p>Keluarga John Doe telah terdaftar di RT 01</p>
-                <p className="font-light">5 mnt ago</p>
-              </AlertDescription>
-            </Alert>
-          </div> */}
-      </main>
+        <Footer />
+      </div>
     </>
-  )
+  );
 }
