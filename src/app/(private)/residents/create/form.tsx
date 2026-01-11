@@ -1,9 +1,11 @@
+"use client"
+
 import React, { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Search, XCircleIcon } from "lucide-react"
+import { XCircleIcon } from "lucide-react"
 import Spinner from "@/components/spinner"
 import { createResidentSchema } from "@/schemas/resident"
 import { createResident } from "@/lib/resident/actions"

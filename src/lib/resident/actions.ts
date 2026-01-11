@@ -57,3 +57,11 @@ export const updateResident = (
 export const deleteResident = (id: string): Promise<ResidentResponse> => {
   return apiCall<ResidentResponse>("delete", `/resident/${id}`)
 }
+
+export const getStatisticsGender = (): Promise<ResidentResponse> => {
+  return apiCall<ResidentResponse>("get", "/api/resident/statistics/gender")
+}
+
+export const getStatisticsAge = (): Promise<ResidentResponse> => {
+  return apiCall<ResidentResponse>("get", "/api/resident/statistics/age")
+}

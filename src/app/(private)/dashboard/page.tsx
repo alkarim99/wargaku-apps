@@ -6,7 +6,11 @@ import { BookA, Users, Home } from "lucide-react"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { getAllFamily } from "@/lib/family/actions"
-import { getAllResident } from "@/lib/resident/actions"
+import {
+  getAllResident,
+  getStatisticsGender,
+  getStatisticsAge,
+} from "@/lib/resident/actions"
 
 export default async function Page() {
   const session = await getServerSession(authOptions)
@@ -20,6 +24,9 @@ export default async function Page() {
 
   const residentsData = await getAllResident()
   const totalResidents = residentsData?.data?.length
+
+  const statisticsGender = await getStatisticsGender()
+  const statisticsAge = await getStatisticsAge()
 
   return (
     <>
@@ -45,8 +52,32 @@ export default async function Page() {
             <Alert>
               <Home className="h-4 w-4" />
               <AlertTitle>Total Rukun Tetangga</AlertTitle>
-              <AlertDescription>12 RT</AlertDescription>
+              <AlertDescription>10 RT</AlertDescription>
             </Alert>
+            {statisticsGender &&
+              statisticsGender.data.map((data: any, index: number) => (
+                <Alert key={index}>
+                  <Users className="h-4 w-4" />
+                  <AlertTitle>
+                    {data.gender == "MALE" ? "Laki-laki" : "Perempuan"}
+                  </AlertTitle>
+                  <AlertDescription>{data.count} jiwa</AlertDescription>
+                </Alert>
+              ))}
+          </div>
+          <div className="mx-auto grid lg:grid-cols-3 w-full max-w-6xl items-start gap-6 ">
+            {statisticsAge &&
+              statisticsAge?.data?.map((data: any, index: number) => (
+                <Alert key={index}>
+                  <Users className="h-4 w-4" />
+                  <AlertTitle>{data.category}</AlertTitle>
+                  <AlertDescription>
+                    {data.count} jiwa ({data.percentage}) <br />
+                    {data.maleCount} Laki-laki <br />
+                    {data.femaleCount} Perempuan
+                  </AlertDescription>
+                </Alert>
+              ))}
           </div>
           {/* <div className="mx-auto grid w-full max-w-6xl gap-2">
             <h2 className="text-xl font-semibold">Aktivitas Terbaru</h2>
